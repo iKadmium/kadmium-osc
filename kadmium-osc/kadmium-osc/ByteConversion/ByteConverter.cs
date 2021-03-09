@@ -235,7 +235,7 @@ namespace Kadmium_Osc.ByteConversion
 			}
 			else if (value is OscMessage message)
 			{
-				Write(bytes, value);
+				Write(bytes, message);
 			}
 			else
 			{

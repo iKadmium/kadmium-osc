@@ -41,11 +41,10 @@ namespace OscLogger
 
 		static void Main(string[] args)
 		{
-			IPEndPoint endPoint = new IPEndPoint(IPAddress.Loopback, 10000);
 			OscServer server = new OscServer();
 
 			server.OnMessageReceived += (object sender, OscMessage message) => WriteMessage(message, 0);
-			server.Listen(endPoint);
+			server.Listen(IPAddress.Loopback.ToString(), 10000);
 			Console.ReadLine();
 		}
 	}

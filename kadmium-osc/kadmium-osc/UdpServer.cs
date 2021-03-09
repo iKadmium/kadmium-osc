@@ -16,9 +16,9 @@ namespace Kadmium_Osc
 
 		public event EventHandler<byte[]> OnPacketReceived;
 
-		public void Listen(IPEndPoint endPoint)
+		public void Listen(string hostname, int port)
 		{
-			Client = new UdpClient(endPoint);
+			Client = new UdpClient(hostname, port);
 			TokenSource = new CancellationTokenSource();
 			var token = TokenSource.Token;
 			Task.Run(async () =>
@@ -31,10 +31,16 @@ namespace Kadmium_Osc
 			});
 		}
 
+		public async Task Send(string hostname, int port, ReadOnlyMemory<byte> bytes)
+		{
+			Client = new UdpClient();
+			await Client.SendAsync(bytes.ToArray(), bytes.Span.Length, hostname, port);
+		}
+
 		public void Dispose()
 		{
-			TokenSource.Cancel();
-			Client.Dispose();
+			TokenSource?.Cancel();
+			Client?.Dispose();
 		}
 	}
 }

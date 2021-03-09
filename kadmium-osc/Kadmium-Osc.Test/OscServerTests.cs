@@ -21,7 +21,7 @@ namespace Kadmium_Osc.Test
 			OscMessage received = null;
 
 			server.OnMessageReceived += (object sender, OscMessage message) => received = message;
-			server.Listen(null);
+			server.Listen(null, -1);
 
 			Mock.Get(udpServer).Raise(x => x.OnPacketReceived += null, null, null);
 			

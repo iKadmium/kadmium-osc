@@ -48,14 +48,14 @@ namespace Kadmium_Osc
 			}
 		}
 
-		public void Listen(IPEndPoint endPoint)
+		public void Listen(string hostname, int port)
 		{
 			UdpServer.OnPacketReceived += (object sender, byte[] packet) =>
 			{
 				OscPacket oscPacket = ByteConverter.GetPacket(packet);
 				ProcessPacket(oscPacket);
 			};
-			UdpServer.Listen(endPoint);
+			UdpServer.Listen(hostname, port);
 			
 		}
 
