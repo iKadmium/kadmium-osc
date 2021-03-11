@@ -8,7 +8,7 @@ namespace Kadmium_Osc.ByteConversion
 {
 	public abstract class ByteConverter : IByteConverter
 	{
-		private static DateTime ReferenceDate { get; } = new DateTime(1900, 1, 1);
+		private static long TicksPerSecond = 10_000_000;
 
 		public string GetAsciiString(ReadOnlyMemory<byte> bytes)
 		{
@@ -19,12 +19,11 @@ namespace Kadmium_Osc.ByteConversion
 
 		public DateTime GetTimeTag(ReadOnlyMemory<byte> bytes)
 		{
-			var seconds = GetInt32(bytes.Slice(0, 4));
-			var fraction = GetUInt32(bytes.Slice(4, 4));
+			var seconds = GetUInt32(bytes.Slice(0));
+			var fraction = GetUInt32(bytes.Slice(4));
+			long fractionTicks = (long)(((double)fraction / ((double)UInt32.MaxValue + 1)) * TicksPerSecond);
 
-			double fractionSeconds = seconds + ((double)fraction / UInt32.MaxValue);
-
-			var date = ReferenceDate.AddSeconds(fractionSeconds);
+			var date = OscTimeTag.MinValue.AddSeconds(seconds).AddTicks(fractionTicks);
 
 			return date;
 		}
@@ -143,7 +142,7 @@ namespace Kadmium_Osc.ByteConversion
 
 		public void Write(Memory<byte> bytes, DateTime value)
 		{
-			var totalSeconds = (value - ReferenceDate).TotalSeconds;
+			var totalSeconds = (value - OscTimeTag.MinValue).TotalSeconds;
 			var wholeSeconds = (int)Math.Floor(totalSeconds);
 			var fractionSeconds = (totalSeconds - wholeSeconds);
 			var fraction = (UInt32)(fractionSeconds * UInt32.MaxValue);
@@ -212,13 +211,13 @@ namespace Kadmium_Osc.ByteConversion
 		public void Write(Memory<byte> bytes, OscBundle value)
 		{
 			var bundleString = new OscString("#bundle");
-			
+
 			Write(bytes, bundleString.Value);
 			bytes.Slice(bundleString.Length);
 
 			Write(bytes, value.TimeTag);
 			bytes = bytes.Slice(value.TimeTag.Length);
-			
+
 			foreach (var element in value.Contents)
 			{
 				Write(bytes, value.Length);

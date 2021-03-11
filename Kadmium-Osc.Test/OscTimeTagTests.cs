@@ -16,5 +16,19 @@ namespace Kadmium_Osc.Test
 
 			Assert.Equal(value, oscTime.Value);
 		}
+
+		[Fact]
+		public void Given_TheValueIsGreaterThanTheMaximum_When_TheConstructorIsUsed_Then_AnExceptionIsThrown()
+		{
+			DateTime value = OscTimeTag.MaxValue.AddTicks(1);
+			Assert.Throws<ArgumentException>(() => new OscTimeTag(value));
+		}
+
+		[Fact]
+		public void Given_TheValueIsLessThanTheMinimum_When_TheConstructorIsUsed_Then_AnExceptionIsThrown()
+		{
+			DateTime value = new DateTime(1900, 1, 1).AddTicks(-1);
+			Assert.Throws<ArgumentException>(() => new OscTimeTag(value));
+		}
 	}
 }
