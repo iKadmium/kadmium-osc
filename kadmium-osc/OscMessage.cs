@@ -17,8 +17,7 @@ namespace Kadmium_Osc
 		}
 		public OscString Address { get; set; }
 		public List<OscArgument> Arguments { get; }
-		private IByteConverter ByteConverter { get; }
-
+		
 		public override OscInt Length
 		{
 			get
@@ -27,14 +26,15 @@ namespace Kadmium_Osc
 			}
 		}
 
-		public OscMessage() : this(BitConverter.IsLittleEndian ? (IByteConverter)new LittleEndianByteConverter() : new BigEndianByteConverter() )
+		public OscMessage()
 		{
+			Arguments = new List<OscArgument>();
 		}
 
-		public OscMessage(IByteConverter byteConverter)
+		public OscMessage(string address, params OscArgument[] arguments) : this()
 		{
-			ByteConverter = byteConverter;
-			Arguments = new List<OscArgument>();
+			Address = address;
+			Arguments.AddRange(arguments);
 		}
 
 		public T GetArgument<T>(int index)

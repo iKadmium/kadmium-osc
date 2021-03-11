@@ -15,12 +15,7 @@ namespace OscSender
 				var settings = Args.Parse<OscSenderArgs>(args);
 				using (OscClient client = new OscClient())
 				{
-					OscMessage message = new OscMessage()
-					{
-						Address = settings.Address
-					};
-					message.Arguments.Add(settings.StringValue);
-
+					OscMessage message = new OscMessage(settings.Address, settings.StringValue);
 					await client.Send(settings.Hostname, settings.Port, message);
 				}
 

@@ -10,6 +10,7 @@ namespace Kadmium_Osc
 	{
 		event EventHandler<byte[]> OnPacketReceived;
 		void Listen(string hostname, int port);
+		void Listen(int port);
 		Task Send(string hostname, int port, ReadOnlyMemory<byte> packet);
 	}
 }
