@@ -1,4 +1,5 @@
-﻿using Kadmium_Osc.ByteConversion;
+﻿using Kadmium_Osc.Arguments;
+using Kadmium_Osc.ByteConversion;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
@@ -13,8 +14,8 @@ namespace Kadmium_Osc.Test
 		[Fact]
 		public void When_GetTimeTagIsCalledWithAFractionalTime_Then_TheValueIsParsedCorrectly()
 		{
-			var expected = new DateTime(1900, 1, 1, 0, 0, 0, 500);
-			var bytes = new byte[8] { 0, 0, 0, 0, 0x7F, 0xFF, 0xFF, 0xFF };
+			var expected = OscTimeTag.MinValue.AddTicks(5000000);
+			var bytes = new byte[8] { 0, 0, 0, 0, 0x80, 0, 0, 0 };
 
 			LittleEndianByteConverter converter = new LittleEndianByteConverter();
 			Assert.Equal(expected, converter.GetTimeTag(bytes));
@@ -23,8 +24,18 @@ namespace Kadmium_Osc.Test
 		[Fact]
 		public void When_GetTimeTagIsCalledWithJustSecondData_Then_TheTagIsCreatedProperly()
 		{
-			var expected = new DateTime(1900, 1, 1, 0, 0, 1, 0);
-			var bytes = new byte[8] { 0, 0, 0, 0x01, 0, 0, 0, 0 };
+			var expected = OscTimeTag.MinValue.AddSeconds(1);
+			var bytes = new byte[8] { 0, 0, 0, 1, 0, 0, 0, 0 };
+
+			LittleEndianByteConverter converter = new LittleEndianByteConverter();
+			Assert.Equal(expected, converter.GetTimeTag(bytes));
+		}
+
+		[Fact]
+		public void When_GetTimeTagIsCalledWithTheMaxValue_Then_TheValueIsParsedCorrectly()
+		{
+			var expected = OscTimeTag.MaxValue;
+			var bytes = new byte[8] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
 
 			LittleEndianByteConverter converter = new LittleEndianByteConverter();
 			Assert.Equal(expected, converter.GetTimeTag(bytes));

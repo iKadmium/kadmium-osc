@@ -20,7 +20,7 @@ namespace OscSender
 				}
 
 			}
-			catch(ArgException ex)
+			catch (ArgException ex)
 			{
 				Console.WriteLine(ex.Message);
 				Console.WriteLine(ArgUsage.GenerateUsageFromTemplate<OscSenderArgs>());
