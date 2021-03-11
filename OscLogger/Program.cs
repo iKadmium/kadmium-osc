@@ -41,11 +41,14 @@ namespace OscLogger
 
 		static void Main(string[] args)
 		{
-			OscServer server = new OscServer();
-
-			server.OnMessageReceived += (object sender, OscMessage message) => WriteMessage(message, 0);
-			server.Listen(IPAddress.Loopback.ToString(), 10000);
-			Console.ReadLine();
+			int port = 10000;
+			
+			using (OscServer server = new OscServer())
+			{
+				server.OnMessageReceived += (object sender, OscMessage message) => WriteMessage(message, 0);
+				server.Listen(port);
+				Console.ReadLine();
+			}
 		}
 	}
 }
