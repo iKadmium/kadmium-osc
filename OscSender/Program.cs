@@ -13,11 +13,9 @@ namespace OscSender
 			try
 			{
 				var settings = Args.Parse<OscSenderArgs>(args);
-				using (OscClient client = new OscClient())
-				{
-					OscMessage message = new OscMessage(settings.Address, settings.StringValue);
-					await client.Send(settings.Hostname, settings.Port, message);
-				}
+				using OscClient client = new OscClient();
+				OscMessage message = new OscMessage(settings.Address, settings.StringValue);
+				await client.Send(settings.Hostname, settings.Port, message);
 
 			}
 			catch (ArgException ex)
