@@ -1,13 +1,48 @@
 ﻿using Kadmium_Osc.Arguments;
-using Kadmium_Osc.ByteConversion;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Kadmium_Osc
 {
-	public abstract class OscPacket
+	public abstract class OscPacket : IEquatable<OscPacket>
 	{
-		public abstract OscInt Length { get; }
+		public abstract UInt32 Length { get; }
+		public abstract void Write(Span<byte> bytes);
+
+		public static OscPacket Parse(ReadOnlySpan<byte> value)
+		{
+			var openingString = OscString.Parse(value);
+			if (openingString == "#bundle")
+			{
+				return OscBundle.Parse(value);
+			}
+			else
+			{
+				return OscMessage.Parse(value);
+			}
+		}
+
+		public override bool Equals(object obj)
+		{
+			return Equals(obj as OscPacket);
+		}
+
+		public bool Equals(OscPacket other)
+		{
+			if (other == null || (this.GetType() != other.GetType()))
+			{
+				return false;
+			}
+			if (this is OscMessage thisMsg && other is OscMessage otherMsg)
+			{
+				return thisMsg.Equals(otherMsg);
+			}
+			if (this is OscBundle thisBundle && other is OscBundle otherBundle)
+			{
+				return thisBundle.Equals(otherBundle);
+			}
+			return false;
+		}
 	}
 }

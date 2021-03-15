@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>Kadmium_Osc</RootNamespace>
   </PropertyGroup>
 
@@ -17,6 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Kadmium-Udp" Version="0.1.1" />
     <PackageReference Include="System.Memory" Version="4.5.4" />
     <InternalsVisibleTo Include="Kadmium-Osc.Test" />
     <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />

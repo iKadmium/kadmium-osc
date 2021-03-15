@@ -4,38 +4,36 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using Kadmium_Osc.ByteConversion;
+using Kadmium_Udp;
 
 namespace Kadmium_Osc
 {
 	public class OscClient : IDisposable
 	{
-		private IUdpServer UdpServer { get; }
-		private IByteConverter ByteConverter { get; }
-
-		internal OscClient(IUdpServer udpServer, IByteConverter byteConverter)
+		private IUdpWrapper UdpWrapper { get; }
+		
+		internal OscClient(IUdpWrapper udpWrapper)
 		{
-			UdpServer = udpServer;
-			ByteConverter = byteConverter;
+			UdpWrapper = udpWrapper;
 		}
 
-		public OscClient() : this(new UdpServer(), BitConverter.IsLittleEndian ? (IByteConverter)new LittleEndianByteConverter() : new BigEndianByteConverter())
+		public OscClient() : this(new UdpWrapper())
 		{
 		}
 
 		public async Task Send(string hostname, int port, OscPacket packet)
 		{
-			using (var owner = MemoryPool<byte>.Shared.Rent(packet.Length))
+			using (var owner = MemoryPool<byte>.Shared.Rent((int)packet.Length))
 			{
-				var bytes = owner.Memory.Slice(0, packet.Length);
-				ByteConverter.Write(bytes, packet);
-				await UdpServer.Send(hostname, port, bytes);
+				var bytes = owner.Memory.Slice(0, (int)packet.Length);
+				packet.Write(bytes.Span);
+				await UdpWrapper.Send(hostname, port, bytes);
 			}
 		}
 
 		public void Dispose()
 		{
-			UdpServer.Dispose();
+			UdpWrapper.Dispose();
 		}
 	}
 }

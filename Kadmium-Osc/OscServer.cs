@@ -1,5 +1,5 @@
-﻿using Kadmium_Osc.ByteConversion;
-using System;
+﻿using System;
+using Kadmium_Udp;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
@@ -12,16 +12,14 @@ namespace Kadmium_Osc
 	public class OscServer : IDisposable
 	{
 		public EventHandler<OscMessage> OnMessageReceived { get; set; }
-		private IUdpServer UdpServer { get; }
-		private IByteConverter ByteConverter { get; }
+		private IUdpWrapper UdpWrapper { get; }
 
-		internal OscServer(IUdpServer udpServer, IByteConverter byteConverter)
+		internal OscServer(IUdpWrapper udpWrapper)
 		{
-			UdpServer = udpServer;
-			ByteConverter = byteConverter;
+			UdpWrapper = udpWrapper;
 		}
 
-		public OscServer() : this(new UdpServer(), BitConverter.IsLittleEndian ? (IByteConverter)new LittleEndianByteConverter() : new BigEndianByteConverter() )
+		public OscServer() : this(new UdpWrapper())
 		{
 		}
 
@@ -50,28 +48,28 @@ namespace Kadmium_Osc
 
 		private void AddEventListener()
 		{
-			UdpServer.OnPacketReceived += (object sender, byte[] packet) =>
+			UdpWrapper.OnPacketReceived += (object sender, UdpReceiveResult result) =>
 			{
-				OscPacket oscPacket = ByteConverter.GetPacket(packet);
+				OscPacket oscPacket = OscPacket.Parse(result.Buffer);
 				ProcessPacket(oscPacket);
 			};
 		}
 
 		public void Listen(int port)
 		{
-			UdpServer.Listen(port);
+			UdpWrapper.Listen(port);
 			AddEventListener();
 		}
 
 		public void Listen(string hostname, int port)
 		{
-			UdpServer.Listen(hostname, port);
+			UdpWrapper.Listen(hostname, port);
 			AddEventListener();
 		}
 
 		public void Dispose()
 		{
-			UdpServer.Dispose();
+			UdpWrapper.Dispose();
 		}
 	}
 }
