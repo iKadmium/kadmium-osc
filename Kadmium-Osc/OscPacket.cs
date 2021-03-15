@@ -23,17 +23,8 @@ namespace Kadmium_Osc
 			}
 		}
 
-		public override bool Equals(object obj)
-		{
-			return Equals(obj as OscPacket);
-		}
-
 		public bool Equals(OscPacket other)
 		{
-			if (other == null || (this.GetType() != other.GetType()))
-			{
-				return false;
-			}
 			if (this is OscMessage thisMsg && other is OscMessage otherMsg)
 			{
 				return thisMsg.Equals(otherMsg);

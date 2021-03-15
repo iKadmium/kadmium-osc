@@ -12,7 +12,7 @@ namespace Kadmium_Osc.Test
 	public class OscBundleTests
 	{
 		[Fact]
-		public void Given_TheBundleHasASingleMessage_When_ParseIsCalled_Then_TheResultIsParses()
+		public void Given_TheBundleHasASingleMessage_When_ParseIsCalled_Then_TheResultIsParsed()
 		{
 			var bundleString = new OscString("#bundle");
 			var timeTag = new OscTimeTag(OscTimeTag.MinValue);
@@ -61,6 +61,36 @@ namespace Kadmium_Osc.Test
 			Assert.Equal(second, message.GetArgument<OscFloat>(1).Value);
 			Assert.Equal(third, message.GetArgument<OscString>(2).Value);
 			Assert.Equal(fourth, message.GetArgument<OscBlob>(3).Value);
+		}
+
+		[Fact]
+		public void Given_TheBundleHasASingleMessage_When_WriteIsCalled_Then_TheResultIsCorrect()
+		{
+			var expected = new byte[]
+			{
+				//bundle tag
+				(byte)'#', (byte)'b', (byte)'u', (byte)'n', (byte)'d', (byte)'l', (byte)'e', 0,
+				//time tag
+				0, 0, 0, 0, 0, 0, 0, 0,
+				//length
+				0, 0, 0, 12,
+				// address
+				(byte)'/', (byte)'t', (byte)'e', (byte)'s', (byte)'t', 0, 0, 0,
+				// type tag
+				(byte)',', 0, 0, 0
+			};
+			var timeTag = new OscTimeTag(OscTimeTag.MinValue);
+			OscMessage payload = new OscMessage("/test");
+
+			OscBundle bundle = new OscBundle();
+			bundle.TimeTag = timeTag;
+			bundle.Contents.Add(payload);
+
+			using var actualOwner = MemoryPool<byte>.Shared.Rent((int)bundle.Length);
+			var actualMemory = actualOwner.Memory.Slice(0, (int)bundle.Length);
+			bundle.Write(actualMemory.Span);
+
+			Assert.Equal(expected, actualMemory.ToArray());
 		}
 	}
 }
