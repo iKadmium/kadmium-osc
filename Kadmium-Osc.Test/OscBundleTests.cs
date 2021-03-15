@@ -18,9 +18,7 @@ namespace Kadmium_Osc.Test
 			var timeTag = new OscTimeTag(OscTimeTag.MinValue);
 			OscMessage payload = new OscMessage("/test");
 
-			OscBundle expected = new OscBundle();
-			expected.TimeTag = timeTag;
-			expected.Contents.Add(payload);
+			OscBundle expected = new OscBundle(timeTag, payload);
 
 			using var owner = MemoryPool<byte>.Shared.Rent((int)expected.Length);
 			var memory = owner.Memory.Slice(0, (int)expected.Length);
@@ -82,15 +80,51 @@ namespace Kadmium_Osc.Test
 			var timeTag = new OscTimeTag(OscTimeTag.MinValue);
 			OscMessage payload = new OscMessage("/test");
 
-			OscBundle bundle = new OscBundle();
-			bundle.TimeTag = timeTag;
-			bundle.Contents.Add(payload);
-
+			OscBundle bundle = new OscBundle(timeTag, payload);
+			
 			using var actualOwner = MemoryPool<byte>.Shared.Rent((int)bundle.Length);
 			var actualMemory = actualOwner.Memory.Slice(0, (int)bundle.Length);
 			bundle.Write(actualMemory.Span);
 
 			Assert.Equal(expected, actualMemory.ToArray());
+		}
+
+		[Fact]
+		public void Given_TheTwoAreEqual_When_EqualsIsCalled_Then_ItReturnsTrue()
+		{
+			OscMessage message = new OscMessage("/test", "Hello World");
+			OscTimeTag timeTag = OscTimeTag.MinValue;
+
+			OscBundle first = new OscBundle(timeTag, message);
+			OscBundle second = new OscBundle(timeTag, message);
+
+			Assert.Equal(first, second);
+		}
+
+		[Fact]
+		public void Given_DifferentTimeTags_When_EqualsIsCalled_Then_ItReturnsFalse()
+		{
+			OscMessage message = new OscMessage("/test", "Hello World");
+			OscTimeTag firstTimeTag = OscTimeTag.MinValue;
+			OscTimeTag secondTimeTag = OscTimeTag.MinValue.AddDays(1);
+
+			OscBundle first = new OscBundle(firstTimeTag, message);
+			OscBundle second = new OscBundle(secondTimeTag, message);
+
+			Assert.NotEqual(first, second);
+		}
+
+		[Fact]
+		public void Given_DifferentMessages_When_EqualsIsCalled_Then_ItReturnsFalse()
+		{
+			OscMessage firstMessage = new OscMessage("/test", "Hello World");
+			OscMessage secondMessage = new OscMessage("/test", "Goodbye World");
+			OscTimeTag timeTag = OscTimeTag.MinValue;
+
+			OscBundle first = new OscBundle(timeTag, firstMessage);
+			OscBundle second = new OscBundle(timeTag, secondMessage);
+
+			Assert.NotEqual(first, second);
 		}
 	}
 }

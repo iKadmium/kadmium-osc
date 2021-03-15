@@ -41,9 +41,7 @@ namespace Kadmium_Osc.Test
 
 			using var server = new OscServer(udpServer);
 			var message = new OscMessage("/test", 1f);
-			var sent = new OscBundle();
-			sent.TimeTag = new OscTimeTag(OscTimeTag.MinValue);
-			sent.Contents.Add(message);
+			var sent = new OscBundle(OscTimeTag.MinValue, message);
 			OscMessage received = null;
 
 			server.OnMessageReceived += (object sender, OscMessage message) => received = message;
@@ -65,9 +63,7 @@ namespace Kadmium_Osc.Test
 
 			using var server = new OscServer(udpServer);
 			var message = new OscMessage("/test", 1f);
-			var sent = new OscBundle();
-			sent.TimeTag = new OscTimeTag(OscTimeTag.MinValue);
-			sent.Contents.Add(message);
+			var sent = new OscBundle(OscTimeTag.MinValue, message);
 			OscMessage received = null;
 
 			server.OnMessageReceived += (object sender, OscMessage message) => received = message;

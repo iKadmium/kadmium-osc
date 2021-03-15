@@ -21,9 +21,10 @@ namespace Kadmium_Osc
 			}
 		}
 
-		public OscBundle()
+		public OscBundle(OscTimeTag timeTag, params OscPacket[] contents)
 		{
-			Contents = new List<OscPacket>();
+			TimeTag = timeTag;
+			Contents = new List<OscPacket>(contents);
 		}
 
 		public override void Write(Span<byte> bytes)
@@ -52,8 +53,7 @@ namespace Kadmium_Osc
 			var timeTag = OscTimeTag.Parse(bytes);
 			bytes = bytes.Slice((int)timeTag.Length);
 
-			OscBundle bundle = new OscBundle();
-			bundle.TimeTag = timeTag;
+			OscBundle bundle = new OscBundle(timeTag);
 
 			while (bytes.Length > 0)
 			{
