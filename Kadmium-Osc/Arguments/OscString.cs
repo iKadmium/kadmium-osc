@@ -43,16 +43,6 @@ namespace Kadmium_Osc.Arguments
 			return result;
 		}
 
-		public override bool Equals(object obj)
-		{
-			return Equals(obj as OscString);
-		}
-
-		public override int GetHashCode()
-		{
-			return Value.GetHashCode();
-		}
-
 		public bool Equals(OscString other)
 		{
 			return other is OscString @string &&

@@ -13,9 +13,8 @@ namespace Kadmium_Osc.Arguments
 		public static implicit operator OscArgument(string s) => new OscString(s);
 		public static implicit operator OscArgument(int i) => new OscInt(i);
 		public static implicit operator OscArgument(float f) => new OscFloat(f);
-		public static implicit operator OscArgument(ReadOnlyMemory<byte> b) => new OscBlob(b.Span);
-		public static implicit operator OscArgument(ReadOnlySpan<byte> b) => new OscBlob(b);
 		public static implicit operator OscArgument(byte[] b) => new OscBlob(b);
+		public static implicit operator OscArgument(DateTime d) => new OscTimeTag(d);
 
 		public static OscArgument Parse(ReadOnlySpan<byte> bytes, char typeTag)
 		{

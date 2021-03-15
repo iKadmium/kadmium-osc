@@ -64,20 +64,10 @@ namespace Kadmium_Osc.Arguments
 			return date;
 		}
 
-		public override bool Equals(object obj)
-		{
-			return Equals(obj as OscTimeTag);
-		}
-
 		public bool Equals(OscTimeTag other)
 		{
 			return other != null &&
 				   Value == other.Value;
-		}
-
-		public override int GetHashCode()
-		{
-			return Value.GetHashCode();
 		}
 	}
 }

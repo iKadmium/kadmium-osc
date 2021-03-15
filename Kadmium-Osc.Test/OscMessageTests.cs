@@ -29,17 +29,20 @@ namespace Kadmium_Osc.Test
 			float second = 10f;
 			string third = "My string";
 			byte[] fourth = new byte[] { 1, 2, 3, 4 };
+			DateTime fifth = OscTimeTag.MinValue;
 
 			OscMessage message = new OscMessage();
 			message.Arguments.Add(first);
 			message.Arguments.Add(second);
 			message.Arguments.Add(third);
 			message.Arguments.Add(fourth);
+			message.Arguments.Add(fifth);
 
 			Assert.Equal(first, message.GetArgument<OscInt>(0).Value);
 			Assert.Equal(second, message.GetArgument<OscFloat>(1).Value);
 			Assert.Equal(third, message.GetArgument<OscString>(2).Value);
 			Assert.Equal(fourth, message.GetArgument<OscBlob>(3).Value);
+			Assert.Equal(fifth, message.GetArgument<OscTimeTag>(4).Value);
 		}
 	}
 }

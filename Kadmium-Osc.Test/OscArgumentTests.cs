@@ -66,5 +66,27 @@ namespace Kadmium_Osc.Test
 			var actual = OscArgument.Parse(bytes.Span, 'b');
 			Assert.Equal(expected, actual);
 		}
+
+		[Fact]
+		public void When_ParseIsCalledForATimeTag_Then_TheResultIsCorrect()
+		{
+			var expected = new OscTimeTag(OscTimeTag.MinValue);
+			using var owner = MemoryPool<byte>.Shared.Rent();
+			var bytes = owner.Memory.Slice(0, (int)expected.Length);
+			expected.Write(bytes.Span);
+
+			var actual = OscArgument.Parse(bytes.Span, 't');
+			Assert.Equal(expected, actual);
+		}
+
+		[Fact]
+		public void When_ParseIsCalledForARandomTag_Then_NullIsReturned()
+		{
+			using var owner = MemoryPool<byte>.Shared.Rent();
+			var bytes = owner.Memory.Slice(0, (int)4);
+			
+			var actual = OscArgument.Parse(bytes.Span, '?');
+			Assert.Null(actual);
+		}
 	}
 }

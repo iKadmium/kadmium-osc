@@ -39,20 +39,10 @@ namespace Kadmium_Osc.Arguments
 			return BinaryPrimitives.ReadSingleBigEndian(bytes);
 		}
 
-		public override bool Equals(object obj)
-		{
-			return Equals(obj as OscFloat);
-		}
-
 		public bool Equals(OscFloat other)
 		{
 			return other != null &&
 				   Value == other.Value;
-		}
-
-		public override int GetHashCode()
-		{
-			return Value.GetHashCode();
 		}
 	}
 }
