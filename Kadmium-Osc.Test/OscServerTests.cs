@@ -67,7 +67,7 @@ namespace Kadmium_Osc.Test
 			OscMessage received = null;
 
 			server.OnMessageReceived += (object sender, OscMessage message) => received = message;
-			server.Listen(null, -1);
+			server.Listen(-1);
 
 			using var owner = MemoryPool<byte>.Shared.Rent((int)sent.Length);
 			var bytes = owner.Memory.Slice(0, (int)sent.Length);
