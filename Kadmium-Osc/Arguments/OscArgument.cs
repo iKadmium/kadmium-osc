@@ -4,12 +4,12 @@ using System.Text;
 
 namespace Kadmium_Osc.Arguments
 {
-	public abstract class OscArgument
+	public abstract class OscArgument : IEquatable<OscArgument>
 	{
 		public abstract UInt32 Length { get; }
 		public abstract char TypeTag { get; }
 		public abstract void Write(Span<byte> bytes);
-		
+
 		public static implicit operator OscArgument(string s) => new OscString(s);
 		public static implicit operator OscArgument(int i) => new OscInt(i);
 		public static implicit operator OscArgument(float f) => new OscFloat(f);
@@ -49,6 +49,35 @@ namespace Kadmium_Osc.Arguments
 			{
 				return original;
 			}
+		}
+
+		public bool Equals(OscArgument other)
+		{
+			if(other == null)
+			{
+				return false;
+			}
+			if (this is OscString thisStr && other is OscString otherStr)
+			{
+				return thisStr.Equals(otherStr);
+			}
+			else if (this is OscInt thisInt && other is OscInt otherInt)
+			{
+				return thisInt.Equals(otherInt);
+			}
+			else if (this is OscFloat thisFloat && other is OscFloat otherFloat)
+			{
+				return thisFloat.Equals(otherFloat);
+			}
+			else if (this is OscBlob thisBlob && other is OscBlob otherBlob)
+			{
+				return thisBlob.Equals(otherBlob);
+			}
+			else if (this is OscTimeTag thisTimeTag && other is OscTimeTag otherTimeTag)
+			{
+				return thisTimeTag.Equals(otherTimeTag);
+			}
+			return false;
 		}
 	}
 }

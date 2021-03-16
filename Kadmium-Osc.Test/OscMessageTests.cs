@@ -44,5 +44,32 @@ namespace Kadmium_Osc.Test
 			Assert.Equal(fourth, message.GetArgument<OscBlob>(3).Value);
 			Assert.Equal(fifth, message.GetArgument<OscTimeTag>(4).Value);
 		}
+
+		[Fact]
+		public void Given_TheMessagesAreEqual_When_EqualsIsCalled_Then_ItReturnsTrue()
+		{
+			OscMessage first = new OscMessage("/test", "Hello World");
+			OscMessage second = new OscMessage("/test", "Hello World");
+
+			Assert.Equal(first, second);
+		}
+
+		[Fact]
+		public void Given_TheMessagesHaveDifferentAddresses_When_EqualsIsCalled_Then_ItReturnsFalse()
+		{
+			OscMessage first = new OscMessage("/test", "Hello World");
+			OscMessage second = new OscMessage("/other", "Hello World");
+
+			Assert.NotEqual(first, second);
+		}
+
+		[Fact]
+		public void Given_TheMessagesHaveDifferentMessages_When_EqualsIsCalled_Then_ItReturnsFalse()
+		{
+			OscMessage first = new OscMessage("/test", "Hello World");
+			OscMessage second = new OscMessage("/test", "Goodbye World");
+
+			Assert.NotEqual(first, second);
+		}
 	}
 }
