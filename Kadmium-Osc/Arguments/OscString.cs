@@ -45,8 +45,8 @@ namespace Kadmium_Osc.Arguments
 
 		public bool Equals(OscString other)
 		{
-			return other is OscString @string &&
-				   Value == @string.Value;
+			return other is OscString str &&
+				   Value.Equals(str.Value);
 		}
 	}
 }

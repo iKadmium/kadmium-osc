@@ -83,11 +83,6 @@ namespace Kadmium_Osc
 			}
 		}
 
-		public override bool Equals(object obj)
-		{
-			return Equals(obj as OscMessage);
-		}
-
 		public bool Equals(OscMessage other)
 		{
 			return other != null &&
@@ -96,11 +91,6 @@ namespace Kadmium_Osc
 				   Address.Equals(other.Address) &&
 				   Arguments.SequenceEqual(other.Arguments) &&
 				   Length == other.Length;
-		}
-
-		public override int GetHashCode()
-		{
-			return HashCode.Combine(Length, TypeTag, Address, Arguments, Length);
 		}
 	}
 }

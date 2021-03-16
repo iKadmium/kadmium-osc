@@ -45,16 +45,6 @@ namespace Kadmium_Osc.Arguments
 			return new OscBlob(bytes.Slice(4, (int)length));
 		}
 
-		public override bool Equals(object obj)
-		{
-			return Equals(obj as OscBlob);
-		}
-
-		public override int GetHashCode()
-		{
-			return Value.GetHashCode();
-		}
-
 		public bool Equals(OscBlob other)
 		{
 			return other != null &&

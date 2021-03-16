@@ -17,19 +17,20 @@ namespace Kadmium_Osc
 		{
 			get
 			{
-				return (UInt32)(BundleString.Length + TimeTag.Length + Contents.Sum(x => x.Length) + (4 * Contents.Count()));
+				return (UInt32)(BundleString.Length + TimeTag.Length + Contents.Sum(x => x.Length) + (4 * Contents.Count));
 			}
 		}
 
-		public OscBundle()
+		public OscBundle(OscTimeTag timeTag, params OscPacket[] contents)
 		{
-			Contents = new List<OscPacket>();
+			TimeTag = timeTag;
+			Contents = new List<OscPacket>(contents);
 		}
 
 		public override void Write(Span<byte> bytes)
 		{
 			BundleString.Write(bytes);
-			bytes.Slice((int)BundleString.Length);
+			bytes = bytes.Slice((int)BundleString.Length);
 
 			TimeTag.Write(bytes);
 			bytes = bytes.Slice((int)TimeTag.Length);
@@ -38,8 +39,9 @@ namespace Kadmium_Osc
 			{
 				var length = new OscInt((int)element.Length);
 				length.Write(bytes);
-				bytes = bytes.Slice((int)element.Length);
+				bytes = bytes.Slice((int)length.Length);
 				element.Write(bytes);
+				bytes = bytes.Slice((int)element.Length);
 			}
 		}
 
@@ -51,8 +53,7 @@ namespace Kadmium_Osc
 			var timeTag = OscTimeTag.Parse(bytes);
 			bytes = bytes.Slice((int)timeTag.Length);
 
-			OscBundle bundle = new OscBundle();
-			bundle.TimeTag = timeTag;
+			OscBundle bundle = new OscBundle(timeTag);
 
 			while (bytes.Length > 0)
 			{
@@ -68,11 +69,6 @@ namespace Kadmium_Osc
 			return bundle;
 		}
 
-		public override bool Equals(object obj)
-		{
-			return Equals(obj as OscBundle);
-		}
-
 		public bool Equals(OscBundle other)
 		{
 			return other != null &&
@@ -80,11 +76,6 @@ namespace Kadmium_Osc
 				   Contents.SequenceEqual(other.Contents) &&
 				   TimeTag.Equals(other.TimeTag) &&
 				   Length == other.Length;
-		}
-
-		public override int GetHashCode()
-		{
-			return HashCode.Combine(Length, Contents, TimeTag, Length);
 		}
 	}
 }
