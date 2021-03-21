@@ -13,17 +13,19 @@ namespace Kadmium_Osc
 	{
 		public EventHandler<OscMessage> OnMessageReceived { get; set; }
 		private IUdpWrapper UdpWrapper { get; }
+		private ITimeProvider TimeProvider { get; }
 
-		internal OscServer(IUdpWrapper udpWrapper)
+		internal OscServer(IUdpWrapper udpWrapper, ITimeProvider timeProvider)
 		{
 			UdpWrapper = udpWrapper;
+			TimeProvider = timeProvider;
 		}
 
-		public OscServer() : this(new UdpWrapper())
+		public OscServer() : this(new UdpWrapper(), new TimeProvider())
 		{
 		}
 
-		private void ProcessPacket(OscPacket packet)
+		private async Task ProcessPacket(OscPacket packet)
 		{
 			if (packet is OscMessage message)
 			{
@@ -32,26 +34,26 @@ namespace Kadmium_Osc
 			else if(packet is OscBundle bundle)
 			{
 				// deal with the timetag
-				if (bundle.TimeTag.Value <= DateTime.Now)
+				if (bundle.TimeTag.Value > TimeProvider.Now)
 				{
-					foreach (var content in bundle.Contents)
-					{
-						ProcessPacket(content);
-					}
+					await TimeProvider.WaitUntil(bundle.TimeTag.Value);
 				}
-				else
+
+				var tasks = new List<Task>();
+				foreach (var content in bundle.Contents)
 				{
-					Console.WriteLine("Waiting to process bundle at " + bundle.TimeTag.Value);
+					tasks.Add(ProcessPacket(content));
 				}
+				await Task.WhenAll(tasks);
 			}
 		}
 
 		private void AddEventListener()
 		{
-			UdpWrapper.OnPacketReceived += (object sender, UdpReceiveResult result) =>
+			UdpWrapper.OnPacketReceived += async (object sender, UdpReceiveResult result) =>
 			{
 				OscPacket oscPacket = OscPacket.Parse(result.Buffer);
-				ProcessPacket(oscPacket);
+				await ProcessPacket(oscPacket);
 			};
 		}
 

@@ -9,7 +9,7 @@
     <Title>Kadmium OSC</Title>
     <Description>A fairly lightweight OSC package for .Net</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Version>0.1.2</Version>
+    <Version>0.1.3</Version>
     <Authors>Jesse Higginson</Authors>
     <PackageProjectUrl>https://github.com/iKadmium/kadmium-osc</PackageProjectUrl>
     <RepositoryUrl>https://github.com/iKadmium/kadmium-osc.git</RepositoryUrl>
