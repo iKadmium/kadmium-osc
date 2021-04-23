@@ -1,28 +1,76 @@
-﻿using System;
+﻿using Kadmium_Osc.Arguments;
 using Kadmium_Udp;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Kadmium_Osc
 {
-	public class OscServer : IDisposable
+	public class OscServer : IDisposable, IOscServer
 	{
-		public EventHandler<OscMessage> OnMessageReceived { get; set; }
-		private IUdpWrapper UdpWrapper { get; }
-		private ITimeProvider TimeProvider { get; }
+		public OscServer() : this(new UdpWrapper(), new TimeProvider())
+		{
+		}
 
 		internal OscServer(IUdpWrapper udpWrapper, ITimeProvider timeProvider)
 		{
 			UdpWrapper = udpWrapper;
 			TimeProvider = timeProvider;
+			RouteHandlers = new Dictionary<OscPattern, List<EventHandler<OscMessage>>>();
 		}
 
-		public OscServer() : this(new UdpWrapper(), new TimeProvider())
+		public event EventHandler<OscMessage> OnMessageReceived;
+
+		public event EventHandler<OscMessage> OnUnhandledMessageReceived;
+
+		private Dictionary<OscPattern, List<EventHandler<OscMessage>>> RouteHandlers { get; }
+		private ITimeProvider TimeProvider { get; }
+		private IUdpWrapper UdpWrapper { get; }
+		public void AddAddressRoute(string address, EventHandler<OscMessage> eventHandler)
 		{
+			var pattern = new OscPattern(address);
+			if (!RouteHandlers.ContainsKey(pattern))
+			{
+				RouteHandlers.Add(pattern, new List<EventHandler<OscMessage>>());
+			}
+			RouteHandlers[pattern].Add(eventHandler);
+		}
+
+		public void Dispose()
+		{
+			UdpWrapper.Dispose();
+		}
+
+		public void Listen(IPEndPoint endPoint)
+		{
+			UdpWrapper.Listen(endPoint);
+			AddEventListener();
+		}
+
+		private void AddEventListener()
+		{
+			UdpWrapper.OnPacketReceived += async (object sender, UdpReceiveResult result) =>
+			{
+				OscPacket oscPacket = OscPacket.Parse(result.Buffer);
+				await ProcessPacket(oscPacket);
+			};
+		}
+
+		private IEnumerable<EventHandler<OscMessage>> GetMatchingHandlers(OscString address)
+		{
+			foreach (var (pattern, handlers) in RouteHandlers)
+			{
+				if (pattern.Matches(address))
+				{
+					foreach (var handler in handlers)
+					{
+						yield return handler;
+					}
+				}
+			}
 		}
 
 		private async Task ProcessPacket(OscPacket packet)
@@ -30,8 +78,20 @@ namespace Kadmium_Osc
 			if (packet is OscMessage message)
 			{
 				OnMessageReceived?.Invoke(this, message);
+				var handlers = GetMatchingHandlers(message.Address).ToList();
+				if (handlers.Count > 0)
+				{
+					foreach (var handler in handlers)
+					{
+						handler.Invoke(this, message);
+					}
+				}
+				else
+				{
+					OnUnhandledMessageReceived?.Invoke(this, message);
+				}
 			}
-			else if(packet is OscBundle bundle)
+			else if (packet is OscBundle bundle)
 			{
 				// deal with the timetag
 				if (bundle.TimeTag.Value > TimeProvider.Now)
@@ -46,32 +106,6 @@ namespace Kadmium_Osc
 				}
 				await Task.WhenAll(tasks);
 			}
-		}
-
-		private void AddEventListener()
-		{
-			UdpWrapper.OnPacketReceived += async (object sender, UdpReceiveResult result) =>
-			{
-				OscPacket oscPacket = OscPacket.Parse(result.Buffer);
-				await ProcessPacket(oscPacket);
-			};
-		}
-
-		public void Listen(int port)
-		{
-			UdpWrapper.Listen(port);
-			AddEventListener();
-		}
-
-		public void Listen(string hostname, int port)
-		{
-			UdpWrapper.Listen(hostname, port);
-			AddEventListener();
-		}
-
-		public void Dispose()
-		{
-			UdpWrapper.Dispose();
 		}
 	}
 }

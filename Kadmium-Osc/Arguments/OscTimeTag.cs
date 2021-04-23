@@ -50,13 +50,13 @@ namespace Kadmium_Osc.Arguments
 			var fraction = (UInt32)(fractionSeconds * UInt32.MaxValue);
 
 			BinaryPrimitives.WriteUInt32BigEndian(bytes, wholeSeconds);
-			BinaryPrimitives.WriteUInt32BigEndian(bytes.Slice(4), fraction);
+			BinaryPrimitives.WriteUInt32BigEndian(bytes[4..], fraction);
 		}
 
 		public static OscTimeTag Parse(ReadOnlySpan<byte> bytes)
 		{
-			var seconds = BinaryPrimitives.ReadUInt32BigEndian(bytes.Slice(0));
-			var fraction = BinaryPrimitives.ReadUInt32BigEndian(bytes.Slice(4));
+			var seconds = BinaryPrimitives.ReadUInt32BigEndian(bytes[..]);
+			var fraction = BinaryPrimitives.ReadUInt32BigEndian(bytes[4..]);
 			long fractionTicks = (long)(((double)fraction / ((double)UInt32.MaxValue + 1)) * TicksPerSecond);
 
 			var date = OscTimeTag.MinValue.AddSeconds(seconds).AddTicks(fractionTicks);

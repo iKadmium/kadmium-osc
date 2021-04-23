@@ -48,5 +48,10 @@ namespace Kadmium_Osc.Arguments
 			return other is OscString str &&
 				   Value.Equals(str.Value);
 		}
+
+		public override int GetHashCode()
+		{
+			return Value.GetHashCode();
+		}
 	}
 }

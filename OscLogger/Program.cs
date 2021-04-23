@@ -46,7 +46,7 @@ namespace OscLogger
 			using (OscServer server = new OscServer())
 			{
 				server.OnMessageReceived += (object sender, OscMessage message) => WriteMessage(message, 0);
-				server.Listen(port);
+				server.Listen(new IPEndPoint(IPAddress.Any, port));
 				Console.ReadLine();
 			}
 		}

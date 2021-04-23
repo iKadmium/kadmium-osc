@@ -1,6 +1,7 @@
 ﻿using Kadmium_Osc;
 using PowerArgs;
 using System;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -15,7 +16,8 @@ namespace OscSender
 				var settings = Args.Parse<OscSenderArgs>(args);
 				using OscClient client = new OscClient();
 				OscMessage message = new OscMessage(settings.Address, settings.StringValue);
-				await client.Send(settings.Hostname, settings.Port, message);
+				var addresses = await Dns.GetHostAddressesAsync(settings.Hostname);
+				await client.Send(new IPEndPoint(addresses.First(), settings.Port), message);
 
 			}
 			catch (ArgException ex)

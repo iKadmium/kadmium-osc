@@ -25,7 +25,7 @@ namespace Kadmium_Osc.Test
 			OscMessage received = null;
 
 			server.OnMessageReceived += (object sender, OscMessage message) => received = message;
-			server.Listen(null, -1);
+			server.Listen(new IPEndPoint(IPAddress.Any, 0));
 
 			using var owner = MemoryPool<byte>.Shared.Rent((int)sent.Length);
 			var bytes = owner.Memory.Slice(0, (int)sent.Length);
@@ -48,7 +48,7 @@ namespace Kadmium_Osc.Test
 			OscMessage received = null;
 
 			server.OnMessageReceived += (object sender, OscMessage message) => received = message;
-			server.Listen(null, -1);
+			server.Listen(new IPEndPoint(IPAddress.Any, 0));
 
 			using var owner = MemoryPool<byte>.Shared.Rent((int)sent.Length);
 			var bytes = owner.Memory.Slice(0, (int)sent.Length);
@@ -74,7 +74,7 @@ namespace Kadmium_Osc.Test
 			var receivedCount = 0;
 
 			server.OnMessageReceived += (object sender, OscMessage message) => receivedCount++;
-			server.Listen(-1);
+			server.Listen(new IPEndPoint(IPAddress.Any, 0));
 
 			using var owner = MemoryPool<byte>.Shared.Rent((int)sent.Length);
 			var bytes = owner.Memory.Slice(0, (int)sent.Length);
@@ -109,7 +109,7 @@ namespace Kadmium_Osc.Test
 			var receivedCount = 0;
 
 			server.OnMessageReceived += (object sender, OscMessage message) => receivedCount++;
-			server.Listen(-1);
+			server.Listen(new IPEndPoint(IPAddress.Any, 0));
 
 			using var owner = MemoryPool<byte>.Shared.Rent((int)sent.Length);
 			var bytes = owner.Memory.Slice(0, (int)sent.Length);
@@ -121,6 +121,69 @@ namespace Kadmium_Osc.Test
 			waitTaskCompleted = true;
 			await Task.Delay(100);
 			Assert.Equal(1, receivedCount);
+		}
+
+		[Fact]
+		public void Given_ThereIsAHandlerForTheMessage_When_TheMessageIsReceived_Then_TheHandlerIsInvoked()
+		{
+			var sent = new OscMessage("/test", "Hello World!");
+
+			var udpWrapper = Mock.Of<IUdpWrapper>();
+			var server = new OscServer(udpWrapper, null);
+			OscMessage received = null;
+			server.AddAddressRoute("/test", (sender, msg) => received = msg);
+
+			server.Listen(new IPEndPoint(IPAddress.Any, 0));
+
+			using var owner = MemoryPool<byte>.Shared.Rent((int)sent.Length);
+			var bytes = owner.Memory.Slice(0, (int)sent.Length);
+			sent.Write(bytes.Span);
+
+			Mock.Get(udpWrapper).Raise(x => x.OnPacketReceived += null, null, new UdpReceiveResult(bytes.ToArray(), new IPEndPoint(0, 0)));
+
+			Assert.Equal(sent, received);
+		}
+
+		[Fact]
+		public void Given_TheHandlerDoesNotMatchTheMessageAddress_When_TheMessageIsReceived_Then_TheHandlerIsNotInvoked()
+		{
+			var sent = new OscMessage("/test", "Hello World!");
+
+			var udpWrapper = Mock.Of<IUdpWrapper>();
+			var server = new OscServer(udpWrapper, null);
+			OscMessage received = null;
+			server.AddAddressRoute("/othertest", (sender, msg) => received = msg);
+
+			server.Listen(new IPEndPoint(IPAddress.Any, 0));
+
+			using var owner = MemoryPool<byte>.Shared.Rent((int)sent.Length);
+			var bytes = owner.Memory.Slice(0, (int)sent.Length);
+			sent.Write(bytes.Span);
+
+			Mock.Get(udpWrapper).Raise(x => x.OnPacketReceived += null, null, new UdpReceiveResult(bytes.ToArray(), new IPEndPoint(0, 0)));
+
+			Assert.Null(received);
+		}
+
+		[Fact]
+		public void Given_ThereIsNoHandlerForTheMessage_When_TheMessageIsReceived_Then_TheUnmatchedHandlerIsInvoked()
+		{
+			var sent = new OscMessage("/test", "Hello World!");
+
+			var udpWrapper = Mock.Of<IUdpWrapper>();
+			var server = new OscServer(udpWrapper, null);
+			OscMessage received = null;
+			server.OnUnhandledMessageReceived += (sender, msg) => received = msg;
+
+			server.Listen(new IPEndPoint(IPAddress.Any, 0));
+
+			using var owner = MemoryPool<byte>.Shared.Rent((int)sent.Length);
+			var bytes = owner.Memory.Slice(0, (int)sent.Length);
+			sent.Write(bytes.Span);
+
+			Mock.Get(udpWrapper).Raise(x => x.OnPacketReceived += null, null, new UdpReceiveResult(bytes.ToArray(), new IPEndPoint(0, 0)));
+
+			Assert.Equal(sent, received);
 		}
 	}
 }

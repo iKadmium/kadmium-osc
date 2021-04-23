@@ -48,9 +48,9 @@ namespace Kadmium_Osc
 			{
 				Address = OscString.Parse(bytes)
 			};
-			bytes = bytes.Slice((int)message.Address.Length);
+			bytes = bytes[(int)message.Address.Length..];
 			var typeTag = new OscString(OscString.Parse(bytes));
-			bytes = bytes.Slice((int)typeTag.Length);
+			bytes = bytes[(int)typeTag.Length..];
 
 			foreach (char typeChar in typeTag.Value)
 			{
@@ -58,7 +58,7 @@ namespace Kadmium_Osc
 				if (argument != null)
 				{
 					message.Arguments.Add(argument);
-					bytes = bytes.Slice((int)argument.Length);
+					bytes = bytes[(int)argument.Length..];
 				}
 			}
 
@@ -68,17 +68,17 @@ namespace Kadmium_Osc
 		public override void Write(Span<byte> bytes)
 		{
 			Address.Write(bytes);
-			bytes = bytes.Slice((int)Address.Length);
+			bytes = bytes[(int)Address.Length..];
 
 			TypeTag.Write(bytes);
-			bytes = bytes.Slice((int)TypeTag.Length);
+			bytes = bytes[(int)TypeTag.Length..];
 
 			foreach (var argument in Arguments)
 			{
 				if (argument.Length > 0)
 				{
 					argument.Write(bytes);
-					bytes = bytes.Slice((int)argument.Length);
+					bytes = bytes[(int)argument.Length..];
 				}
 			}
 		}

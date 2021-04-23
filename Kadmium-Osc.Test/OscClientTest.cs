@@ -4,6 +4,7 @@ using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
@@ -15,34 +16,30 @@ namespace Kadmium_Osc.Test
 		[Fact]
 		public async Task When_SendMessageIsCalled_Then_TheMessageIsPassedToTheUdpWrapper()
 		{
-			OscMessage message = new OscMessage("/test", "Hello World!");
+			var message = new OscMessage("/test", "Hello World!");
 			using var memoryOwner = MemoryPool<byte>.Shared.Rent((int)message.Length);
 			var expectedPayload = memoryOwner.Memory.Slice(0, (int)message.Length);
 			message.Write(expectedPayload.Span);
 
-			string expectedHostname = "www.example.com";
-			int expectedPort = 1234;
+			var expectedEndpoint = new IPEndPoint(IPAddress.Loopback, 1234);
 
-			string actualHostname = null;
-			int actualPort = 0;
+			IPEndPoint actualEndpoint = null;
 			ReadOnlyMemory<byte> actualPayload = null;
 
 			var udpClient = Mock.Of<IUdpWrapper>();
 			Mock.Get(udpClient)
-				.Setup(x => x.Send(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<ReadOnlyMemory<byte>>()))
+				.Setup(x => x.Send(It.IsAny<IPEndPoint>(), It.IsAny<ReadOnlyMemory<byte>>()))
 				.Returns(Task.CompletedTask)
-				.Callback<string, int, ReadOnlyMemory<byte>>((hostname, port, payload) =>
+				.Callback<IPEndPoint, ReadOnlyMemory<byte>>((endpoint, payload) =>
 				{
-					actualHostname = hostname;
-					actualPort = port;
+					actualEndpoint = endpoint;
 					actualPayload = payload;
 				});
 
 			using OscClient client = new OscClient(udpClient);
-			await client.Send(expectedHostname, expectedPort, message);
+			await client.Send(expectedEndpoint, message);
 
-			Assert.Equal(expectedHostname, actualHostname);
-			Assert.Equal(expectedPort, actualPort);
+			Assert.Equal(expectedEndpoint, actualEndpoint);
 			Assert.Equal(expectedPayload.ToArray(), actualPayload.ToArray());
 		}
 	}
