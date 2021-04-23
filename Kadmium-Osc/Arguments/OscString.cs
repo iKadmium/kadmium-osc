@@ -49,9 +49,6 @@ namespace Kadmium_Osc.Arguments
 				   Value.Equals(str.Value);
 		}
 
-		public override int GetHashCode()
-		{
-			return Value.GetHashCode();
-		}
+		public override int GetHashCode() => Value.GetHashCode();
 	}
 }

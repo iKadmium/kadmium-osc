@@ -60,5 +60,13 @@ namespace Kadmium_Osc.Test
 			oscString.Write(actual.Span);
 			Assert.Equal(expected, actual.ToArray());
 		}
+
+		[Fact]
+		public void When_GetHashCodeIsCalled_Then_TheOutputShouldEqualTheStringHashCode()
+		{
+			var str = "This is the string";
+			var oscStr = new OscString(str);
+			Assert.Equal(str.GetHashCode(), oscStr.GetHashCode());
+		}
 	}
 }
