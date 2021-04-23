@@ -29,7 +29,7 @@ namespace Kadmium_Osc.Arguments
 		public override void Write(Span<byte> bytes)
 		{
 			BinaryPrimitives.WriteUInt32BigEndian(bytes, (UInt32)Value.Length);
-			Value.CopyTo(bytes.Slice(4));
+			Value.CopyTo(bytes[4..]);
 		}
 
 		public static implicit operator ReadOnlyMemory<byte>(OscBlob b) => b.Value;

@@ -21,13 +21,13 @@ namespace Kadmium_Osc
 		{
 		}
 
-		public async Task Send(string hostname, int port, OscPacket packet)
+		public async Task Send(IPEndPoint endPoint, OscPacket packet)
 		{
 			using (var owner = MemoryPool<byte>.Shared.Rent((int)packet.Length))
 			{
 				var bytes = owner.Memory.Slice(0, (int)packet.Length);
 				packet.Write(bytes.Span);
-				await UdpWrapper.Send(hostname, port, bytes);
+				await UdpWrapper.Send(endPoint, bytes);
 			}
 		}
 

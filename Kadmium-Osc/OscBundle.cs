@@ -30,40 +30,40 @@ namespace Kadmium_Osc
 		public override void Write(Span<byte> bytes)
 		{
 			BundleString.Write(bytes);
-			bytes = bytes.Slice((int)BundleString.Length);
+			bytes = bytes[(int)BundleString.Length..];
 
 			TimeTag.Write(bytes);
-			bytes = bytes.Slice((int)TimeTag.Length);
+			bytes = bytes[(int)TimeTag.Length..];
 
 			foreach (var element in Contents)
 			{
 				var length = new OscInt((int)element.Length);
 				length.Write(bytes);
-				bytes = bytes.Slice((int)length.Length);
+				bytes = bytes[(int)length.Length..];
 				element.Write(bytes);
-				bytes = bytes.Slice((int)element.Length);
+				bytes = bytes[(int)element.Length..];
 			}
 		}
 
 		public static new OscBundle Parse(ReadOnlySpan<byte> bytes)
 		{
 			var bundleString = OscString.Parse(bytes);
-			bytes = bytes.Slice((int)bundleString.Length);
+			bytes = bytes[(int)bundleString.Length..];
 
 			var timeTag = OscTimeTag.Parse(bytes);
-			bytes = bytes.Slice((int)timeTag.Length);
+			bytes = bytes[(int)timeTag.Length..];
 
 			OscBundle bundle = new OscBundle(timeTag);
 
 			while (bytes.Length > 0)
 			{
 				var packetLength = OscInt.Parse(bytes);
-				bytes = bytes.Slice((int)packetLength.Length);
+				bytes = bytes[(int)packetLength.Length..];
 
 				var packetBytes = bytes.Slice(0, packetLength);
 				OscPacket packet = OscPacket.Parse(packetBytes);
 				bundle.Contents.Add(packet);
-				bytes = bytes.Slice(packetLength);
+				bytes = bytes[(int)packetLength..];
 			}
 
 			return bundle;

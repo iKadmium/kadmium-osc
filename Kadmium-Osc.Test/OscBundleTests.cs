@@ -25,14 +25,14 @@ namespace Kadmium_Osc.Test
 			var bytes = memory;
 
 			bundleString.Write(bytes.Span);
-			bytes = bytes.Slice((int)bundleString.Length);
+			bytes = bytes[(int)bundleString.Length..];
 
 			timeTag.Write(bytes.Span);
-			bytes = bytes.Slice((int)timeTag.Length);
+			bytes = bytes[(int)timeTag.Length..];
 
 			var payloadLength = new OscInt((int)payload.Length);
 			payloadLength.Write(bytes.Span);
-			bytes = bytes.Slice((int)payloadLength.Length);
+			bytes = bytes[(int)payloadLength.Length..];
 
 			payload.Write(bytes.Span);
 
