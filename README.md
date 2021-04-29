@@ -7,7 +7,7 @@ An OSC Library for .Net
 
 ### Receiving OSC events
 
-```
+```c#
 int port = 10000;
 using OscServer server = new OscServer();
 
@@ -19,20 +19,31 @@ server.OnMessageReceived += (object sender, OscMessage message) =>
 	{
 		if (argument is OscString str)
 		{
-			Console.WriteLine(str);
+			Console.WriteLine(str); 
+			string otherString = str;
 		}
 		else if (argument is OscFloat flt)
 		{
 			// process it somehow...
 		}
 	}
+	// OscStrings, OscFloats, etc, have implicit conversions to their C# types
+	float firstArgument = message.GetArgument<OscFloat>(0);
 };
+
+// Listen for messages to a specific address route
+server.AddAddressRoute("/stopAll", (sender, msg) => Process(msg));
+server.AddAddressRoute("/track/*/{play,stop}", (sender, msg) => Process(msg));
+
+// Listen for any messages that don't match any address routes
+server.OnUnhandledMessageReceived += (sender, msg) => ProcessUnhandled(msg);
+
 server.Listen(IPAddress.Loopback.ToString(), port);
 ```
 
 ## Sending OSC events
 
-```
+```c#
 int port = 10000;
 string address = "/test";
 string payload = "Hello world!";
