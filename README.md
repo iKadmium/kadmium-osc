@@ -1,6 +1,8 @@
 # kadmium-osc
 An OSC Library for .Net
 
+[![codecov](https://codecov.io/gh/iKadmium/kadmium-osc/branch/main/graph/badge.svg?token=2QMOKGS6OD)](https://codecov.io/gh/iKadmium/kadmium-osc)
+![build status](https://github.com/iKadmium/kadmium-osc/actions/workflows/publish.yml/badge.svg)
 ## Usage
 
 ### Receiving OSC events
